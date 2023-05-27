@@ -136,9 +136,7 @@ func SearchSets(db, searchDB *sql.DB, opts SearchOptions) ([]Set, error) {
 
 		setIDsQuery += " ORDER BY MATCH(artist, title, creator, source, tags) AGAINST('" + mysqlStringReplacer.Replace(opts.Query) + "') DESC, id DESC " + limit
 
-		fmt.Print("\n")
 		fmt.Println("setIDsQuery = ", setIDsQuery)
-		fmt.Print("\n")
 
 		limit = ""
 
