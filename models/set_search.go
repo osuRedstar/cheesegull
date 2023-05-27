@@ -93,7 +93,9 @@ func SearchSets(db, searchDB *sql.DB, opts SearchOptions) ([]Set, error) {
 		// This is a hack. Apparently, Sphinx does not support AND bitwise
 		// operations in the WHERE clause, so we're placing that in the SELECT
 		// clause and only making sure it's correct in this place.
-		havingConds = " valid_set_modes = " + sm + " "
+		//havingConds = " valid_set_modes = " + sm + " "
+
+		havingConds = " set_modes = " + sm + " "
 	}
 
 	// Limit user amount for beatmap asking
@@ -134,7 +136,7 @@ func SearchSets(db, searchDB *sql.DB, opts SearchOptions) ([]Set, error) {
 
 		setIDsQuery += " ORDER BY MATCH(artist, title, creator, source, tags) AGAINST('" + mysqlStringReplacer.Replace(opts.Query) + "') DESC, id DESC " + limit
 
-		fmt.Println("setIDsQuery = ", setIDsQuery)
+		//fmt.Println("setIDsQuery = ", setIDsQuery)
 		limit = ""
 
 		// fetch rows
