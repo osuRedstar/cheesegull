@@ -230,6 +230,7 @@ func Search(c *api.Context) {
 	query := c.Request.URL.Query()
 
 	fmt.Println("query = ", query)
+	fmt.Println("query['q'] = ", query["q"])
 	fmt.Println("query.Get('query') = ", query.Get("query"))
 	fmt.Println("query['status'] = ", query["status"])
 	fmt.Println("sIntWithBounds(query['status'], -2, 4) = ", sIntWithBounds(query["status"], -2, 4))
