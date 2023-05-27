@@ -303,4 +303,14 @@ func init() {
 	api.GET("/api/v1/map/:id", BeatmapChimu)
 	api.GET("/api/v1/set/:id", SetChimu)
 	api.GET("/api/v1/search", SearchChimu)
+
+	//cheesegull
+	api.GET("/cheesegull/api/b/:id", Beatmap)
+	api.GET("/cheesegull/api/md5/:id", BeatmapMd5)
+	api.GET("/cheesegull/b/:id", Beatmap)
+	api.GET("/cheesegull/api/s/:id", Set)
+	api.GET("/cheesegull/s/:id", Set)
+
+	api.GET("/cheesegull/api/search", Search)
+	api.GET("/cheesegull/api/update", RefreshSet)
 }
