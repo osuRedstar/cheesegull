@@ -110,12 +110,17 @@ func SearchSets(db, searchDB *sql.DB, opts SearchOptions) ([]Set, error) {
 	limit := fmt.Sprintf(" LIMIT %d, %d ", opts.Offset, opts.Amount)
 
 	if opts.Query != "" {
-		setIDsQuery := "SELECT id, set_modes & " + sm + " AS valid_set_modes FROM cg WHERE "
+		//setIDsQuery := "SELECT id, set_modes & " + sm + " AS valid_set_modes FROM cg WHERE "
+
+		setIDsQuery := "SELECT id, set_modes & " + sm + " AS valid_set_modes FROM sets WHERE "
 
 		// add filters to query
 		// Yes. I know. Prepared statements. But Sphinx doesn't like them, so
 		// bummer.
-		setIDsQuery += "MATCH('" + mysqlStringReplacer.Replace(opts.Query) + "') "
+		//setIDsQuery += "MATCH('" + mysqlStringReplacer.Replace(opts.Query) + "') "
+
+		setIDsQuery += "MATCH(artist, title, creator, source, tags) AGAINST('" + mysqlStringReplacer.Replace(opts.Query) + "') "
+
 		if whereConds != "" {
 			setIDsQuery += "AND " + whereConds
 		}
@@ -125,7 +130,11 @@ func SearchSets(db, searchDB *sql.DB, opts SearchOptions) ([]Set, error) {
 		setIDsQuery = strings.ReplaceAll(setIDsQuery, "sets.", "")
 
 		// set limit
-		setIDsQuery += " ORDER BY WEIGHT() DESC, id DESC " + limit + " OPTION ranker=sph04, max_matches=20000 "
+		//setIDsQuery += " ORDER BY WEIGHT() DESC, id DESC " + limit + " OPTION ranker=sph04, max_matches=20000 "
+
+		setIDsQuery += " ORDER BY MATCH(artist, title, creator, source, tags) AGAINST('" + mysqlStringReplacer.Replace(opts.Query) + "') DESC, id DESC " + limit
+
+		fmt.Println("setIDsQuery = ", setIDsQuery)
 		limit = ""
 
 		// fetch rows
