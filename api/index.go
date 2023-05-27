@@ -32,5 +32,5 @@ func expvarHandler(c *Context) {
 
 func init() {
 	GET("/", index)
-	GET("/expvar", expvarHandler)
+	//GET("/expvar", expvarHandler)
 }
