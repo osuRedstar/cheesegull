@@ -3,7 +3,6 @@
 package metadata
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -228,14 +227,6 @@ func sIntWithBounds(strs []string, min, max int) []int {
 // Search does a search on the sets available in the database.
 func Search(c *api.Context) {
 	query := c.Request.URL.Query()
-
-	fmt.Println("query = ", query)
-	fmt.Println("query['q'] = ", query["q"])
-	fmt.Println("query.Get('query') = ", query.Get("query"))
-	fmt.Println("query['status'] = ", query["status"])
-	fmt.Println("sIntWithBounds(query['status'], -2, 4) = ", sIntWithBounds(query["status"], -2, 4))
-	fmt.Println("sIntWithBounds(query['mode'], 0, 3) = ", sIntWithBounds(query["mode"], 0, 3))
-
 	sets, err := models.SearchSets(c.DB, c.SearchDB, models.SearchOptions{
 		Status: sIntWithBounds(query["status"], -2, 4),
 		Query:  query.Get("query"),
