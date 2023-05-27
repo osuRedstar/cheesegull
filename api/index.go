@@ -14,7 +14,7 @@ func index(c *Context) {
 	if len(page) < 1 {
 		data, err := ioutil.ReadFile("page.html")
 		if err != nil {
-			page = "CheeseGull " + Version + " Woo\nFor more information: https://github.com/osukurikku/cheesegull"
+			page = "CheeseGull " + Version + " Woo\nFor more information: https://github.com/osuRedstar/cheesegull"
 			return
 		}
 
@@ -27,10 +27,11 @@ func index(c *Context) {
 var _evh = expvar.Handler()
 
 func expvarHandler(c *Context) {
-	_evh.ServeHTTP(c.writer, c.Request)
+	//_evh.ServeHTTP(c.writer, c.Request)
+	c.WriteJSON(403, "NAGA!")
 }
 
 func init() {
 	GET("/", index)
-	//GET("/expvar", expvarHandler)
+	GET("/expvar", expvarHandler)
 }
