@@ -289,7 +289,16 @@ func SearchChimu(c *api.Context) {
 	})
 }
 
+var docs_str string = "/api/b/:id, " + "/api/md5/:id, " + "/api/s/:id, " + "/api/search"
+
+func docs_api(c *api.Context) {
+	c.WriteJSON(200, docs_str)
+}
+
 func init() {
+	api.GET("/api", docs_api)
+	api.GET("/cheesegull/api", docs_api)
+
 	api.GET("/api/b/:id", Beatmap)
 	api.GET("/api/md5/:id", BeatmapMd5)
 	api.GET("/b/:id", Beatmap)
