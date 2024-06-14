@@ -3,5 +3,5 @@
 !/data/.gitkeep
 /.env
 /cgbin.db
-#cheesegull.bat
+cheesegull.bat
 cheesegull2.bat
