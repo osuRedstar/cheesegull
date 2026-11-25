@@ -30,18 +30,20 @@ const searchDSNDocs = `"DSN to use for fulltext searches. ` +
 	`behaviour and you should definetely bother to set it up (follow the README).`
 
 var (
-	osuAPIKey        = kingpin.Flag("api-key", "osu! API key").Short('k').Envar("OSU_API_KEY").String()
-	osuUsername      = kingpin.Flag("osu-username", "osu! username (for downloading and fetching whether a beatmap has a video)").Short('u').Envar("OSU_USERNAME").String()
-	osuPassword      = kingpin.Flag("osu-password", "osu! password (for downloading and fetching whether a beatmap has a video)").Short('p').Envar("OSU_PASSWORD").String()
-	mysqlDSN         = kingpin.Flag("mysql-dsn", "DSN of MySQL").Short('m').Default("root@/cheesegull").Envar("MYSQL_DSN").String()
-	searchDSN        = kingpin.Flag("search-dsn", searchDSNDocs).Default("root@tcp(127.0.0.1:9306)/cheesegull").Envar("SEARCH_DSN").String()
-	httpAddr         = kingpin.Flag("http-addr", "Address on which to take HTTP requests.").Short('a').Default("127.0.0.1:62011").String()
-	maxDisk          = kingpin.Flag("max-disk", "Maximum number of GB used by beatmap cache.").Default("10").Envar("MAXIMUM_DISK").Float64()
-	downloadHostname = kingpin.Flag("download-host-name", "Where i should download beatmaps").Default("osu.ppy.sh").Envar("DOWNLOAD_HOSTNAME").String()
-	secretCI         = kingpin.Flag("secret-ci", "CI key for map refreshing and etc").Default("MOM_IS_YOURS").Envar("SECRET_CI").String()
-	bmsOsuKey        = kingpin.Flag("bmsOsuKey", "CI key for bloodcat map archive").Default("MOM_IS_YOURS").Envar("BMS_OSU_KEY").String()
-	removeNonZip     = kingpin.Flag("remove-non-zip", "Remove non-zip files.").Default("false").Bool()
-	dataFolders      = kingpin.Flag("folders", "Paths to folders through ,").Default("/data/").String()
+	osuAPIKey         = kingpin.Flag("api-key", "osu! API key").Short('k').Envar("OSU_API_KEY").String()
+	osuUsername       = kingpin.Flag("osu-username", "osu! username (for downloading and fetching whether a beatmap has a video)").Short('u').Envar("OSU_USERNAME").String()
+	osuPassword       = kingpin.Flag("osu-password", "osu! password (for downloading and fetching whether a beatmap has a video)").Short('p').Envar("OSU_PASSWORD").String()
+	mysqlDSN          = kingpin.Flag("mysql-dsn", "DSN of MySQL").Short('m').Default("root@/cheesegull").Envar("MYSQL_DSN").String()
+	searchDSN         = kingpin.Flag("search-dsn", searchDSNDocs).Default("root@tcp(127.0.0.1:9306)/cheesegull").Envar("SEARCH_DSN").String()
+	httpAddr          = kingpin.Flag("http-addr", "Address on which to take HTTP requests.").Short('a').Default("127.0.0.1:62011").Envar("HTTP_ADDR").String()
+	maxDisk           = kingpin.Flag("max-disk", "Maximum number of GB used by beatmap cache.").Default("10").Envar("MAXIMUM_DISK").Float64()
+	downloadHostname  = kingpin.Flag("download-host-name", "Where i should download beatmaps").Default("osu.ppy.sh").Envar("DOWNLOAD_HOSTNAME").String()
+	secretCI          = kingpin.Flag("secret-ci", "CI key for map refreshing and etc").Default("MOM_IS_YOURS").Envar("SECRET_CI").String()
+	bmsOsuKey         = kingpin.Flag("bmsOsuKey", "CI key for bloodcat map archive").Default("MOM_IS_YOURS").Envar("BMS_OSU_KEY").String()
+	removeNonZip      = kingpin.Flag("remove-non-zip", "Remove non-zip files.").Default("false").Bool()
+	dataFolders       = kingpin.Flag("folders", "Paths to folders through ,").Default("/data/").Envar("DATA_FOLDERS").String()
+	discordWebhookURL = kingpin.Flag("discord-webhook", "Discord Webhook URL for recent beatmaps notification").Envar("DISCORD_WEBHOOK_URL").String()
+	osuRateLimit      = kingpin.Flag("osu-rate-limit", "Max requests per minute to osu! API (0 to disable)").Default("0").Envar("OSU_RATE_LIMIT").Int()
 )
 
 func addTimeParsing(dsn string) string {
@@ -54,6 +56,7 @@ func addTimeParsing(dsn string) string {
 }
 
 func main() {
+	loadDotEnv(".env")
 	kingpin.Parse()
 
 	fmt.Println("CheeseGull", Version)
@@ -77,6 +80,9 @@ func main() {
 
 	// set up osuapi client
 	c := osuapi.NewClient(*osuAPIKey)
+	if *osuRateLimit > 0 {
+		osuapi.RateLimit(*osuRateLimit)
+	}
 
 	// set up downloader
 	downloader.SetHostName(*downloadHostname)
@@ -111,6 +117,10 @@ func main() {
 	// start running components of cheesegull
 	go dbmirror.StartSetUpdater(c, db)
 	go dbmirror.DiscoverEvery(c, db, time.Hour*6, time.Minute)
+
+	if *discordWebhookURL != "" {
+		go StartDiscordWebhook(*osuAPIKey, *discordWebhookURL)
+	}
 
 	// create request handler
 	panic(http.ListenAndServe(*httpAddr, api.CreateHandler(db, db2, house, d, *c, *secretCI)))

@@ -4,4 +4,4 @@
 package main
 
 // Version is the version of cheesegull.
-const Version = "v3.0.3"
+const Version = "v3.1.3_With osu-discord-webhook"
